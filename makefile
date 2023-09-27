@@ -35,7 +35,7 @@ deps-cleancache: ## Clear cache in Go module
 	$(GOCMD) clean -modcache
 
 wire: ## Generate wire_gen.go
-	cd pkg/di && wire
+	cd  pkg/di && wire
 
 swag: ## Generate swagger docs
 	swag init -g pkg/http/handler/user.go -o ./cmd/api/docs

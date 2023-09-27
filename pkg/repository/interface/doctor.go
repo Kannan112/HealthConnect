@@ -7,5 +7,6 @@ import (
 )
 
 type DoctorRepository interface {
-	Register(ctx context.Context, doctor req.DoctorRegistration) error
+	EmailChecking(email string) (bool, error)
+	Register(ctx context.Context, doctor req.DoctorRegistration, hashpassword string) error
 }
