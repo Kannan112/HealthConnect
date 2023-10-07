@@ -6,17 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminAuth(c *gin.Context) {
-	TokenString, err := c.Cookie("AdminAuth")
+func UserAuth(c *gin.Context) {
+	tokenString, err := c.Cookie("userAuth")
 	if err != nil {
 		c.Status(http.StatusUnauthorized)
 		return
 	}
-	adminID, err := ValidateJWT(TokenString)
+	userID, err := ValidateJWT(tokenString)
 	if err != nil {
 		c.Status(http.StatusUnauthorized)
 		return
 	}
-	c.Set("adminId", adminID)
+	c.Set("userId", userID)
 	c.Next()
 }
