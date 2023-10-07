@@ -2,13 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
-
-	domain "github.com/easy-health/pkg/domain"
 	services "github.com/easy-health/pkg/usecase/interface"
+	"github.com/easy-health/pkg/utils/req"
+	"github.com/easy-health/pkg/utils/res"
+	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
@@ -36,88 +34,35 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 // @produce json
 // @Router /api/users [get]
 // @response 200 {object} []Response "OK"
-func (cr *UserHandler) FindAll(c *gin.Context) {
-	users, err := cr.userUseCase.FindAll(c.Request.Context())
 
-	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
-	} else {
-		response := []Response{}
-		copier.Copy(&response, &users)
-
-		c.JSON(http.StatusOK, response)
-	}
-}
-
-func (cr *UserHandler) FindByID(c *gin.Context) {
-	paramsId := c.Param("id")
-	id, err := strconv.Atoi(paramsId)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "cannot parse id",
-		})
+func (c *UserHandler) Register(ctx *gin.Context) {
+	var UserReg req.UserRegister
+	if err := ctx.Bind(&UserReg); err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to bind", err))
 		return
 	}
-
-	user, err := cr.userUseCase.FindByID(c.Request.Context(), uint(id))
-
-	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
-	} else {
-		response := Response{}
-		copier.Copy(&response, &user)
-
-		c.JSON(http.StatusOK, response)
-	}
-}
-
-func (cr *UserHandler) Save(c *gin.Context) {
-	var user domain.Users
-
-	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	if err := c.userUseCase.RegisterUser(ctx, UserReg); err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to register", err.Error()))
 		return
 	}
-
-	user, err := cr.userUseCase.Save(c.Request.Context(), user)
-
-	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
-	} else {
-		response := Response{}
-		copier.Copy(&response, &user)
-
-		c.JSON(http.StatusOK, response)
-	}
+	ctx.JSON(http.StatusAccepted, res.SuccessResponse(200, "user account registerd", nil))
+	return
 }
 
-func (cr *UserHandler) Delete(c *gin.Context) {
-	paramsId := c.Param("id")
-	id, err := strconv.Atoi(paramsId)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Cannot parse id",
-		})
+func (c *UserHandler) Login(ctx *gin.Context) {
+	var Login req.UserLogin
+	if err := ctx.Bind(&Login); err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to bind", err))
 		return
 	}
-
-	ctx := c.Request.Context()
-	user, err := cr.userUseCase.FindByID(ctx, uint(id))
-
+	SignedString, err := c.userUseCase.UserLogin(ctx, Login)
 	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
-	}
-
-	if user == (domain.Users{}) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "User is not booking yet",
-		})
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to register", err.Error()))
 		return
 	}
-
-	cr.userUseCase.Delete(ctx, user)
-
-	c.JSON(http.StatusOK, gin.H{"message": "User is deleted successfully"})
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("AdminAuth", SignedString, 3600*24*30, "", "", false, true)
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
 }
+
+

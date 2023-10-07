@@ -12,3 +12,18 @@ type DoctorLogin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type DoctorProfile struct {
+	Name          string
+	Email         string
+	Specialise    string
+	LicenseNumber string
+	AverageRating int
+	Reviews       []string //incomplete
+}
+
+type Categories struct {
+	ID          int    `json:"id" gorm:"unique;not null"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
