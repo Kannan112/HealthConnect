@@ -3,8 +3,9 @@ package repository
 import (
 	"context"
 
-	domain "github.com/easy-health/pkg/domain"
+	"github.com/easy-health/pkg/domain"
 	interfaces "github.com/easy-health/pkg/repository/interface"
+	"github.com/easy-health/pkg/utils/req"
 	"gorm.io/gorm"
 )
 
@@ -16,28 +17,25 @@ func NewUserRepository(DB *gorm.DB) interfaces.UserRepository {
 	return &userDatabase{DB}
 }
 
-func (c *userDatabase) FindAll(ctx context.Context) ([]domain.Users, error) {
-	var users []domain.Users
-	err := c.DB.Find(&users).Error
+func (c *userDatabase) CreateUser(ctx context.Context, reg req.UserRegister) error {
+	UserProfile := domain.Users{
+		FirstName: reg.FirstName,
+		LastName:  reg.LastName,
+		Email:     reg.Email,
+		Password:  reg.Password,
+		Blocked:   false,
+	}
+	if err := c.DB.Create(&UserProfile).Error; err != nil {
+		return err
+	}
 
-	return users, err
+	return nil
 }
 
-func (c *userDatabase) FindByID(ctx context.Context, id uint) (domain.Users, error) {
-	var user domain.Users
-	err := c.DB.First(&user, id).Error
-
-	return user, err
-}
-
-func (c *userDatabase) Save(ctx context.Context, user domain.Users) (domain.Users, error) {
-	err := c.DB.Save(&user).Error
-
-	return user, err
-}
-
-func (c *userDatabase) Delete(ctx context.Context, user domain.Users) error {
-	err := c.DB.Delete(&user).Error
-
-	return err
+func (c *userDatabase) LoginUser(ctx context.Context, login req.UserLogin) (domain.Users, error) {
+	var Userdata domain.Users
+	if err := c.DB.Raw("select * from doctors where email=$1", login.Email).Scan(&Userdata).Error; err != nil {
+		return Userdata, err
+	}
+	return Userdata, nil
 }

@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/easy-health/pkg/domain"
+	"github.com/easy-health/pkg/utils/req"
 )
 
 type UserRepository interface {
-	FindAll(ctx context.Context) ([]domain.Users, error)
-	FindByID(ctx context.Context, id uint) (domain.Users, error)
-	Save(ctx context.Context, user domain.Users) (domain.Users, error)
-	Delete(ctx context.Context, user domain.Users) error
+	CreateUser(ctx context.Context, reg req.UserRegister) error
+	LoginUser(ctx context.Context, login req.UserLogin) (domain.Users, error)
 }

@@ -19,7 +19,7 @@ func NewDoctorRepository(DB *gorm.DB) interfaces.DoctorRepository {
 
 func (c *DoctorDatabase) EmailChecking(email string) (bool, error) {
 	var count int64
-	query := `SELECT COUNT(*) FROM Doctor_Profiles WHERE email = ?`
+	query := `SELECT COUNT(*) FROM Doctors WHERE email = ?`
 
 	// Execute the query and scan the result into count
 	if err := c.DB.Raw(query, email).Scan(&count).Error; err != nil {
@@ -30,15 +30,16 @@ func (c *DoctorDatabase) EmailChecking(email string) (bool, error) {
 	return count > 0, nil
 }
 
-func (c *DoctorDatabase) Register(ctx context.Context, doctor req.DoctorRegistration, hashedPassword string) error {
-	
-	doctorProfile := domain.DoctorProfiles{
+func (c *DoctorDatabase) Register(ctx context.Context, doctor req.DoctorRegistration, hashedPassword string, categoryId uint) error {
+
+	doctorProfile := domain.Doctors{
 		Name:          doctor.Name,
 		Email:         doctor.Email,
 		Password:      string(hashedPassword), // Store the hashed password in the database
 		Specialise:    doctor.Specialise,
 		LicenseNumber: doctor.LicenseNumber,
 		Approved:      false,
+		CategoriesId:  categoryId,
 	}
 
 	// Insert the doctor's information into the database
@@ -47,4 +48,38 @@ func (c *DoctorDatabase) Register(ctx context.Context, doctor req.DoctorRegistra
 	}
 
 	return nil
+}
+
+func (c *DoctorDatabase) Login(ctx context.Context, data req.DoctorLogin) (domain.Doctors, error) {
+	var doctordata domain.Doctors
+	if err := c.DB.Raw("select * from doctors where email=$1", data.Email).Scan(&doctordata).Error; err != nil {
+		return doctordata, err
+	}
+	return doctordata, nil
+}
+
+func (c *DoctorDatabase) Profile(ctx context.Context, id int) (req.DoctorProfile, error) {
+	var doctorProfile req.DoctorProfile
+	query := `select * from doctors where id=$1`
+	if err := c.DB.Raw(query, id).Scan(&doctorProfile).Error; err != nil {
+		return doctorProfile, err
+	}
+	return doctorProfile, nil
+}
+
+func (c *DoctorDatabase) CheckDoctorId(ctx context.Context, id int) (bool, error) {
+	var check bool
+	if err := c.DB.Raw(`select exists(select * from doctors where id=$1)`, id).Scan(&check).Error; err != nil {
+		return false, err
+	}
+	return check, nil
+}
+
+func (c *DoctorDatabase) CategoryIdCheck(ctx context.Context, categoryId uint) (bool, error) {
+	var check bool
+	query := `select Exists(select * from categories where id=$1)`
+	if err := c.DB.Raw(query, categoryId).Scan(&check).Error; err != nil {
+		return false, err
+	}
+	return check, nil
 }
