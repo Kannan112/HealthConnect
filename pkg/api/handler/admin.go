@@ -25,7 +25,7 @@ func NewAdminHandler(adminUseCase services.AdminUseCase) *AdminHandler {
 // @Summary Create a new admin from admin panel
 // @ID AdminSignup
 // @Description admin creation
-// @Tags Admin
+// @Tags admin
 // @Accept json
 // @Produce json
 // @Param admin body req.AdminLogin true "New Admin details"
@@ -48,6 +48,16 @@ func (c *AdminHandler) AdminSignup(ctx *gin.Context) {
 
 }
 
+// AdminLogin godoc
+// @Summary Admin login
+// @Description Logs in an admin user
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Param adminLogin body req.AdminLogin true "Admin login data"
+// @Success 200 {object} res.Response
+// @failed 400 {object} res.Response
+// @Router /admin/login [post]
 func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 	var adminLogin req.AdminLogin
 	err := ctx.BindJSON(&adminLogin)
