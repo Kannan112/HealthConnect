@@ -47,7 +47,6 @@ func (c *AdminHandler) AdminSignup(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "successful", nil))
 
 }
-
 func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 	var adminLogin req.AdminLogin
 	err := ctx.BindJSON(&adminLogin)
@@ -65,6 +64,10 @@ func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 	ctx.SetCookie("AdminAuth", Token, 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
 
+}
+func (c *AdminHandler) AdminLogout(ctx *gin.Context) {
+	ctx.SetCookie("AdminAuth", "", 3600*24*30, "", "", false, true)
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logoutsuccessfuly", nil))
 }
 
 func (c *AdminHandler) CreateCategory(ctx *gin.Context) {

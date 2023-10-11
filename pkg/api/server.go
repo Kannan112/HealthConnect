@@ -3,7 +3,6 @@ package http
 import (
 	_ "github.com/easy-health/cmd/api/docs"
 	"github.com/easy-health/pkg/api/handler"
-	"github.com/easy-health/pkg/api/middleware"
 	routers "github.com/easy-health/pkg/api/routes"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -15,43 +14,22 @@ type ServerHTTP struct {
 }
 
 func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.DoctorHandler, adminHandler *handler.AdminHandler) *ServerHTTP {
+	// Create a new Gin engine
 	engine := gin.New()
 
-	// Use logger from Gin
+	// Use Gin's built-in logger middleware
 	engine.Use(gin.Logger())
 
-	// Swagger docs
+	// Serve Swagger API documentation
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	// adminSIDE
-	admin := engine.Group("admin")
-	admin.POST("create", adminHandler.AdminSignup)
-	admin.POST("login", adminHandler.AdminLogin)
+	// Set up routes for admin users
+	routers.AdminSetUpRoute(engine, adminHandler)
 
-	category := admin.Group("category", middleware.AdminAuth)
-	{
-		category.GET("", adminHandler.ListCategory)          // Handler for listing categories
-		category.POST("create", adminHandler.CreateCategory) // Handler for creating a category
-		category.DELETE("/:id", adminHandler.DeleteCategory)
-	}
-	Admindoctors := admin.Group("/doctors", middleware.AdminAuth)
-	{
-		Admindoctors.GET("list", adminHandler.ListDoctorsNotApproved)
-		Admindoctors.POST("/approve/:id", adminHandler.ApproveDoctor)
-	}
+	// Set up routes for doctors
+	routers.DoctorSetUpRoute(engine, doctorHandler)
 
-	//doctor
-	doctor := engine.Group("doctor")
-	{
-		doctor.POST("login", doctorHandler.Login) // get block because its not approved by admin
-		doctor.POST("signup/:categoryid", doctorHandler.DoctorRegistration)
-		doctor.GET("/categorylist", doctorHandler.ListCategory)
-		test := doctor.Group("/profile", middleware.DoctorAuth)
-		{
-			test.GET("/", doctorHandler.Profile)
-		}
-	}
-	//patient
+	// Set up routes for patients
 	routers.SetUpUserRoutes(engine, userHandler)
 
 	return &ServerHTTP{engine: engine}
