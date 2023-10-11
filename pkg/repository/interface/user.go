@@ -8,6 +8,7 @@ import (
 )
 
 type UserRepository interface {
+	CheckAccount(ctx context.Context, email string) (bool, error)
 	CreateUser(ctx context.Context, reg req.UserRegister) error
-	LoginUser(ctx context.Context, login req.UserLogin) (domain.Users, error)
+	LoginUser(ctx context.Context, login req.UserLogin) (domain.User, error)
 }

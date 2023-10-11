@@ -18,7 +18,7 @@ func NewUserRepository(DB *gorm.DB) interfaces.UserRepository {
 }
 
 func (c *userDatabase) CreateUser(ctx context.Context, reg req.UserRegister) error {
-	UserProfile := domain.Users{
+	UserProfile := domain.User{
 		FirstName: reg.FirstName,
 		LastName:  reg.LastName,
 		Email:     reg.Email,
@@ -32,10 +32,19 @@ func (c *userDatabase) CreateUser(ctx context.Context, reg req.UserRegister) err
 	return nil
 }
 
-func (c *userDatabase) LoginUser(ctx context.Context, login req.UserLogin) (domain.Users, error) {
-	var Userdata domain.Users
+func (c *userDatabase) LoginUser(ctx context.Context, login req.UserLogin) (domain.User, error) {
+	var Userdata domain.User
 	if err := c.DB.Raw("select * from doctors where email=$1", login.Email).Scan(&Userdata).Error; err != nil {
 		return Userdata, err
 	}
 	return Userdata, nil
+}
+
+func (c *userDatabase) CheckAccount(ctx context.Context, email string) (bool, error) {
+	var check bool
+	query := `select exists(select * from users where email=$1)`
+	if err := c.DB.Raw(query, email).Scan(&check).Error; err != nil {
+		return false, err
+	}
+	return check, nil
 }

@@ -1,8 +1,8 @@
 package req
 
 type UserLogin struct {
-	Email    string
-	Password string
+	Email    string `json:"email" gorm:"not null"`
+	Password string `json:"password" gorm:"not null"`
 }
 
 type UserRegister struct {

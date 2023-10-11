@@ -21,7 +21,8 @@ func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 		&domain.Admin{},
 		&domain.Categories{},
 		&domain.Reviews{},
-
+		&domain.Chat{},
+		&domain.Message{},
 		//session
 		&domain.RefreshSession{},
 	)

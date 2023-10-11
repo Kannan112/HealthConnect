@@ -25,19 +25,18 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 	}
 }
 
-// FindAll godoc
-// @summary Get all users
-// @description Get all users
-// @tags users
-// @security ApiKeyAuth
-// @id FindAll
-// @produce json
-// @Router /api/users [get]
-// @response 200 {object} []Response "OK"
-
+// @Summary Register a new user account
+// @Description Register a new user account with the provided details.
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body req.UserRegister true "User registration request"
+// @Success 202 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Router /user/signup [post]
 func (c *UserHandler) Register(ctx *gin.Context) {
 	var UserReg req.UserRegister
-	if err := ctx.Bind(&UserReg); err != nil {
+	if err := ctx.BindJSON(&UserReg); err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to bind", err))
 		return
 	}
@@ -51,18 +50,16 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 
 func (c *UserHandler) Login(ctx *gin.Context) {
 	var Login req.UserLogin
-	if err := ctx.Bind(&Login); err != nil {
+	if err := ctx.BindJSON(&Login); err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to bind", err))
 		return
 	}
 	SignedString, err := c.userUseCase.UserLogin(ctx, Login)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to register", err.Error()))
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to login", err.Error()))
 		return
 	}
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("AdminAuth", SignedString, 3600*24*30, "", "", false, true)
+	ctx.SetCookie("UserAuth", SignedString, 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
 }
-
-

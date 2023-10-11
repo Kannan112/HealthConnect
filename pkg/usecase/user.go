@@ -33,6 +33,12 @@ func (c *userUseCase) RegisterUser(ctx context.Context, reg req.UserRegister) er
 	return nil
 }
 func (c *userUseCase) UserLogin(ctx context.Context, Login req.UserLogin) (string, error) {
+	exist, err := c.userRepo.CheckAccount(ctx, Login.Email)
+	if err != nil {
+		return "failed", err
+	} else if !exist {
+		return "", errors.New("account not registered")
+	}
 	UserProfile, err := c.userRepo.LoginUser(ctx, Login)
 	if err != nil {
 		return "", err

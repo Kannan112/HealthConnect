@@ -1,6 +1,6 @@
 package domain
 
-type Users struct {
+type User struct {
 	ID        uint   `json:"id" gorm:"unique;not null"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
