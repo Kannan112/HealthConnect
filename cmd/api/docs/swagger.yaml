@@ -55,7 +55,29 @@ paths:
             $ref: '#/definitions/res.Response'
       summary: Create a new admin from admin panel
       tags:
-      - Admin
+      - admin
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in an admin user
+      parameters:
+      - description: Admin login data
+        in: body
+        name: adminLogin
+        required: true
+        schema:
+          $ref: '#/definitions/req.AdminLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Admin login
+      tags:
+      - admin
   /user/signup:
     post:
       consumes:
