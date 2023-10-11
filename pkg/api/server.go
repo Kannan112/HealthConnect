@@ -4,6 +4,7 @@ import (
 	_ "github.com/easy-health/cmd/api/docs"
 	"github.com/easy-health/pkg/api/handler"
 	"github.com/easy-health/pkg/api/middleware"
+	routers "github.com/easy-health/pkg/api/routes"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -51,9 +52,7 @@ func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.Doct
 		}
 	}
 	//patient
-	patient := engine.Group("user")
-	patient.POST("login", userHandler.Login)
-	patient.POST("signup", userHandler.Register)
+	routers.SetUpUserRoutes(engine, userHandler)
 
 	return &ServerHTTP{engine: engine}
 }

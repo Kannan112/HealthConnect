@@ -63,3 +63,7 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	ctx.SetCookie("UserAuth", SignedString, 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
 }
+func (c *UserHandler) Logout(ctx *gin.Context) {
+	ctx.SetCookie("UserAuth", "", 3600*24*30, "", "", false, true)
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logout successfuly", nil))
+}
