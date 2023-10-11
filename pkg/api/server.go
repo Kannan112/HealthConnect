@@ -23,8 +23,6 @@ func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.Doct
 	// Swagger docs
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	engine.POST("reg", doctorHandler.DoctorRegistration)
-
 	// adminSIDE
 	admin := engine.Group("admin")
 	admin.POST("create", adminHandler.AdminSignup)
