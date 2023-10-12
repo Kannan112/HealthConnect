@@ -27,7 +27,7 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 
 // @Summary Register a new user account
 // @Description Register a new user account with the provided details.
-// @Tags User
+// @Tags User Authentication
 // @Accept json
 // @Produce json
 // @Param request body req.UserRegister true "User registration request"
@@ -48,6 +48,15 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 	return
 }
 
+// @Summary User Login
+// @Description Logs in a user.
+// @Tags User Authentication
+// @Accept json
+// @Produce json
+// @Param login body req.UserLogin true "User Login Request"
+// @Success 200 {object} res.Response "Successfully logged in"
+// @Failure 400 {object} res.Response "Bad request or login failure"
+// @Router /user/login [post]
 func (c *UserHandler) Login(ctx *gin.Context) {
 	var Login req.UserLogin
 	if err := ctx.BindJSON(&Login); err != nil {
@@ -63,6 +72,13 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 	ctx.SetCookie("UserAuth", SignedString, 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
 }
+
+// @Summary Logout user from the app
+// @Description Logs out a user.
+// @Tags User Authentication
+// @Produce json
+// @Success 200 {object} res.Response "Logged out successfully"
+// @Router /user/logout [get]
 func (c *UserHandler) Logout(ctx *gin.Context) {
 	ctx.SetCookie("UserAuth", "", 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logout successfuly", nil))

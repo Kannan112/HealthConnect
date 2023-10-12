@@ -25,7 +25,7 @@ func NewAdminHandler(adminUseCase services.AdminUseCase) *AdminHandler {
 // @Summary Create a new admin from admin panel
 // @ID AdminSignup
 // @Description admin creation
-// @Tags admin
+// @Tags User Authentication
 // @Accept json
 // @Produce json
 // @Param admin body req.AdminLogin true "New Admin details"
@@ -51,7 +51,7 @@ func (c *AdminHandler) AdminSignup(ctx *gin.Context) {
 // AdminLogin godoc
 // @Summary Admin login
 // @Description Logs in an admin user
-// @Tags admin
+// @Tags User Authentication
 // @Accept json
 // @Produce json
 // @Param adminLogin body req.AdminLogin true "Admin login data"
