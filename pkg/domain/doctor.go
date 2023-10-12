@@ -29,4 +29,5 @@ type Appointment struct {
 	Discription     string    `json:"description"`
 	UserID          uint      `json:"user_id"`
 	User            User      `json:"user" gorm:"foreignKey:UserID"`
+	CreatedAt       time.Time `json:"created_at"`
 }

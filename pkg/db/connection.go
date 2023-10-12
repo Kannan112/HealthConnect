@@ -23,8 +23,8 @@ func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 		&domain.Reviews{},
 		&domain.Chat{},
 		&domain.Message{},
-		//session
 		&domain.RefreshSession{},
+		&domain.Appointment{},
 	)
 
 	return db, dbErr
