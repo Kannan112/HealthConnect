@@ -6,6 +6,33 @@ definitions:
       password:
         type: string
     type: object
+  req.DoctorLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  req.DoctorRegistration:
+    properties:
+      email:
+        type: string
+      license_number:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      specialise:
+        type: string
+    type: object
+  req.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   req.UserRegister:
     properties:
       email:
@@ -55,7 +82,178 @@ paths:
             $ref: '#/definitions/res.Response'
       summary: Create a new admin from admin panel
       tags:
-      - Admin
+      - User Authentication
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in an admin user
+      parameters:
+      - description: Admin login data
+        in: body
+        name: adminLogin
+        required: true
+        schema:
+          $ref: '#/definitions/req.AdminLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Admin login
+      tags:
+      - User Authentication
+  /admin/logout:
+    get:
+      description: Logs out an admin user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Admin Logout
+      tags:
+      - User Authentication
+  /doctor/{categoryid}/registration:
+    post:
+      consumes:
+      - application/json
+      description: Register a doctor.
+      parameters:
+      - description: Category ID
+        in: path
+        name: categoryid
+        required: true
+        type: integer
+      - description: Doctor Registration Data
+        in: body
+        name: registrationData
+        required: true
+        schema:
+          $ref: '#/definitions/req.DoctorRegistration'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Registration accepted
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad request or registration failure
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Doctor Registration
+      tags:
+      - Doctor Authentication
+  /doctor/categories:
+    get:
+      description: List available categories for doctors.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Categories listed successfully
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Failed to list categories
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: List Doctor Categories
+      tags:
+      - Doctor
+  /doctor/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a doctor.
+      parameters:
+      - description: Doctor Login Request
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/req.DoctorLogin'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Doctor login successful
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad request or login failure
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Doctor Login
+      tags:
+      - Doctor Authentication
+  /doctor/profile:
+    get:
+      description: Get the profile of a doctor.
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Doctor profile retrieved successfully
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad request or profile retrieval failure
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Get Doctor Profile
+      tags:
+      - Doctor
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user.
+      parameters:
+      - description: User Login Request
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/req.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully logged in
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad request or login failure
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: User Login
+      tags:
+      - User Authentication
+  /user/logout:
+    get:
+      description: Logs out a user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged out successfully
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Logout user from the app
+      tags:
+      - User Authentication
   /user/signup:
     post:
       consumes:
@@ -81,5 +279,5 @@ paths:
             $ref: '#/definitions/res.Response'
       summary: Register a new user account
       tags:
-      - User
+      - User Authentication
 swagger: "2.0"

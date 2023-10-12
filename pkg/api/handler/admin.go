@@ -25,7 +25,7 @@ func NewAdminHandler(adminUseCase services.AdminUseCase) *AdminHandler {
 // @Summary Create a new admin from admin panel
 // @ID AdminSignup
 // @Description admin creation
-// @Tags Admin
+// @Tags User Authentication
 // @Accept json
 // @Produce json
 // @Param admin body req.AdminLogin true "New Admin details"
@@ -47,6 +47,17 @@ func (c *AdminHandler) AdminSignup(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "successful", nil))
 
 }
+
+// AdminLogin godoc
+// @Summary Admin login
+// @Description Logs in an admin user
+// @Tags User Authentication
+// @Accept json
+// @Produce json
+// @Param adminLogin body req.AdminLogin true "Admin login data"
+// @Success 200 {object} res.Response
+// @failed 400 {object} res.Response
+// @Router /admin/login [post]
 func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 	var adminLogin req.AdminLogin
 	err := ctx.BindJSON(&adminLogin)
@@ -65,6 +76,13 @@ func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
 
 }
+
+// @Summary Admin Logout
+// @Description Logs out an admin user.
+// @Tags User Authentication
+// @Produce json
+// @Success 200 {object} res.Response
+// @Router /admin/logout [get]]
 func (c *AdminHandler) AdminLogout(ctx *gin.Context) {
 	ctx.SetCookie("AdminAuth", "", 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logoutsuccessfuly", nil))
