@@ -17,7 +17,8 @@ type AdminUseCase interface {
 	ListCategory(ctx context.Context) ([]domain.Categories, error)
 
 	//doctorProfile
-	ListDoctors(ctx context.Context) ([]res.Doctors, error)
+	ListDoctores(ctx context.Context) ([]res.Doctors, error)
+	ApprovePending(ctx context.Context) ([]res.Doctors, error)
 	AdminVerify(ctx context.Context, doctor_id int) error
 	// AdminApprove(ctx context.Context)
 }

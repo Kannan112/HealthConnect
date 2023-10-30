@@ -4,6 +4,8 @@ import (
 	_ "github.com/easy-health/cmd/api/docs"
 	"github.com/easy-health/pkg/api/handler"
 	routers "github.com/easy-health/pkg/api/routes"
+	"github.com/easy-health/pkg/services"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -20,6 +22,13 @@ func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.Doct
 	// Use Gin's built-in logger middleware
 	engine.Use(gin.Logger())
 
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000"} // Allow requests from your React app's origin
+	config.AllowHeaders = []string{"*"}                     // Allow any headers
+	engine.Use(cors.New(config))                            // Use the CORS middleware
+
+	services.AllRooms.Init()
+
 	// Serve Swagger API documentation
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
@@ -30,11 +39,15 @@ func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.Doct
 	routers.DoctorSetUpRoute(engine, doctorHandler)
 
 	// Set up routes for patients
-	routers.SetUpUserRoutes(engine, userHandler)
+	engine.GET("/create", services.CreateRoomRequestHandler)
+
+	engine.GET("/join", services.JoinRoomRequestHandler)
+
+	routers.AuthSetUpRoute(engine, userHandler)
 
 	return &ServerHTTP{engine: engine}
 }
 
 func (sh *ServerHTTP) Start() {
-	sh.engine.Run(":3000")
+	sh.engine.Run(":8000")
 }

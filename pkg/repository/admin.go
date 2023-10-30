@@ -26,7 +26,7 @@ func (c *AdminDatabase) AdminSignup(ctx context.Context, AdminSignup req.AdminLo
 		return err
 	}
 	query := `INSERT INTO admins (name, password) VALUES ($1, $2)`
-	err = c.DB.Exec(query, AdminSignup.Name, hashedPassword).Error
+	err = c.DB.Exec(query, AdminSignup.Email, hashedPassword).Error
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (c *AdminDatabase) AdminSignup(ctx context.Context, AdminSignup req.AdminLo
 
 func (c *AdminDatabase) AdminLogin(ctx context.Context, AdminLogin req.AdminLogin) (data domain.Admin, err error) {
 	query := `select * from admins where name=$1`
-	err = c.DB.Raw(query, AdminLogin.Name).Scan(&data).Error
+	err = c.DB.Raw(query, AdminLogin.Email).Scan(&data).Error
 	if err != nil {
 		return data, err
 	}
@@ -76,6 +76,15 @@ func (c *AdminDatabase) DeleteCategory(ctx context.Context, category_id int) err
 		return err
 	}
 	return nil
+}
+
+func (c *AdminDatabase) ListDoctores(ctx context.Context) ([]res.Doctors, error) {
+	var profile []res.Doctors
+	query := `select * from doctors where approved=false`
+	if err := c.DB.Raw(query).Scan(&profile).Error; err != nil {
+		return profile, err
+	}
+	return profile, nil
 }
 
 func (c *AdminDatabase) WaitingList(ctx context.Context) ([]res.Doctors, error) {

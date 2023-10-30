@@ -62,7 +62,6 @@ func (c *DoctorHandler) DoctorRegistration(ctx *gin.Context) {
 		Data:       nil,
 		Errors:     nil,
 	})
-	return
 
 }
 
@@ -112,7 +111,6 @@ func (c *DoctorHandler) Profile(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "Doctor Profile", data))
-
 }
 
 // @Summary List Doctor Categories

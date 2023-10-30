@@ -19,6 +19,7 @@ type AdminRepository interface {
 	ListCategory(ctx context.Context) ([]domain.Categories, error)
 
 	//List Doctors
+	ListDoctores(ctc context.Context) ([]res.Doctors, error)
 	WaitingList(ctx context.Context) ([]res.Doctors, error)
 	AdminVerify(ctx context.Context, doctor_id int) error
 }

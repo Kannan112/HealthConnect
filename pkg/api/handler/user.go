@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/easy-health/pkg/config"
 	services "github.com/easy-health/pkg/usecase/interface"
 	"github.com/easy-health/pkg/utils/req"
 	"github.com/easy-health/pkg/utils/res"
@@ -11,6 +12,7 @@ import (
 
 type UserHandler struct {
 	userUseCase services.UserUseCase
+	Config      config.Config
 }
 
 type Response struct {
@@ -19,9 +21,10 @@ type Response struct {
 	Surname string `copier:"must"`
 }
 
-func NewUserHandler(usecase services.UserUseCase) *UserHandler {
+func NewUserHandler(usecase services.UserUseCase, Config config.Config) *UserHandler {
 	return &UserHandler{
 		userUseCase: usecase,
+		Config:      Config,
 	}
 }
 

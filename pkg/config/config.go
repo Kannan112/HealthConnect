@@ -13,10 +13,14 @@ type Config struct {
 	DBPassword      string `mapstructure:"DB_PASSWORD"`
 	AccessTokenSrc  string `mapstructure:"ACCESS_TOKEN_SRC "`
 	RefreshTokenSrc string `mapstructure:"REFRESH_TOKEN_SRC"`
+	ClientID        string `mapstructure:"CLIENT_ID"`
+	ClientSecret    string `mapstructure:"CLIENT_SECRET"`
+	RedirectURL     string `mapstructure:"REDIRECT_URL"`
 }
 
 var envs = []string{
 	"DB_HOST", "DB_NAME", "DB_USER", "DB_PORT", "DB_PASSWORD", "ACCESS_TOKEN_SRC", "REFRESH_TOKEN_SRC",
+	"CLIENT_ID", "CLIENT_SECRET", "REDIRECT_URL",
 }
 
 func LoadConfig() (Config, error) {

@@ -18,7 +18,7 @@ func DoctorSetUpRoute(engine *gin.Engine, doctorHandler *handler.DoctorHandler) 
 		}
 		Appointment := doctor.Group("/slot")
 		{
-			Appointment.POST("/add")
+			Appointment.POST("/create")
 		}
 	}
 }

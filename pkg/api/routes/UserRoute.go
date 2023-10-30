@@ -5,11 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetUpUserRoutes(engine *gin.Engine, Handler *handler.UserHandler) {
+func AuthSetUpRoute(engine *gin.Engine, UserHandler *handler.UserHandler) {
+	auth := engine.Group("/auth")
+
+	// Routes for user authentication
+	auth.GET("/login", UserHandler.UserGoogleAuthLoginPage)
+	// Add more authentication routes as needed
 	user := engine.Group("/user")
 	{
-		user.POST("/login", Handler.Login)
-		user.POST("/register", Handler.Register)
-		user.GET("/logout", Handler.Logout)
+		user.POST("/login", UserHandler.Login)
+		user.POST("/register", UserHandler.Register)
+		user.GET("/logout", UserHandler.Logout)
 	}
 }

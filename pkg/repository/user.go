@@ -23,7 +23,6 @@ func (c *userDatabase) CreateUser(ctx context.Context, reg req.UserRegister) err
 		LastName:  reg.LastName,
 		Email:     reg.Email,
 		Password:  reg.Password,
-		Blocked:   false,
 	}
 	if err := c.DB.Create(&UserProfile).Error; err != nil {
 		return err

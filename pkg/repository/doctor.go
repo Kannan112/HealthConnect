@@ -36,9 +36,8 @@ func (c *DoctorDatabase) Register(ctx context.Context, doctor req.DoctorRegistra
 		Name:          doctor.Name,
 		Email:         doctor.Email,
 		Password:      string(hashedPassword), // Store the hashed password in the database
-		Specialise:    doctor.Specialise,
+		About:         doctor.About,           //change it upated is on way
 		LicenseNumber: doctor.LicenseNumber,
-		Approved:      false,
 		CategoriesId:  categoryId,
 	}
 

@@ -6,13 +6,14 @@ import (
 
 type Admin struct {
 	ID       uint   `json:"id" gorm:"unique;not null"`
-	Name     string `json:"name"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type Categories struct {
-	ID          int    `json:"id" gorm:"unique;not null"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   time.Time
+	ID          int       `json:"id" gorm:"unique;not null"`
+	Name        string    `json:"name" gorm:"not null"`
+	Description string    `json:"description" gorm:"not null"`
+	CreatedAt   time.Time `json:"created_at" gorm:"not null"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

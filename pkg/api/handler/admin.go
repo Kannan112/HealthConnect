@@ -21,6 +21,17 @@ func NewAdminHandler(adminUseCase services.AdminUseCase) *AdminHandler {
 	}
 }
 
+// @title Go + Gin E-Commerce API
+// @version 1.0.0
+// @description TechDeck is an E-commerce platform to purchase and sell Electronic itmes
+// @contact.name API Support
+// @securityDefinitions.apikey BearerTokenAuth
+// @in header
+// @name Authorization
+// @host localhost:8080
+// @BasePath
+// @query.collection.format multi
+
 // CreateAdmin
 // @Summary Create a new admin from admin panel
 // @ID AdminSignup
@@ -106,8 +117,16 @@ func (c *AdminHandler) CreateCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, res.SuccessResponse(200, "created", data))
 }
 
+// @Summary List Categories
+// @Description List categories
+// @ID list-categories
+// @Tags Admin
+// @Produce json
+// @Success 200 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Failure 401 {object} res.Response
+// @Router /admin/list-category [get]
 func (c *AdminHandler) ListCategory(ctx *gin.Context) {
-
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
@@ -120,8 +139,18 @@ func (c *AdminHandler) ListCategory(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "category list", data))
-	return
 }
+
+// @Summary Delete Category
+// @Description Delete a category by ID
+// @ID delete-category
+// @Tags Admin
+// @Produce json
+// @Param id query int true "Category ID" Format(int64)
+// @Success 200 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Failure 401 {object} res.Response
+// @Router /admin/delete-category [delete]
 func (c *AdminHandler) DeleteCategory(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
@@ -142,19 +171,39 @@ func (c *AdminHandler) DeleteCategory(ctx *gin.Context) {
 }
 
 // doctors
+
+// @Summary List Doctors Not Approved
+// @Description Get a list of doctors that are not yet approved
+// @ID list-doctors-not-approved
+// @Tags Admin
+// @Produce json
+// @Success 200 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Failure 401 {object} res.Response
+// @Router /admin/list-doctors-not-approved [get]
 func (c *AdminHandler) ListDoctorsNotApproved(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
 		return
 	}
-	data, err := c.adminUseCase.ListDoctors(ctx)
+	data, err := c.adminUseCase.ApprovePending(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err))
 	}
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "list of doctors to approve", data))
 }
 
+// @Summary Approve a Doctor
+// @Description Approve a doctor by ID
+// @ID approve-doctor
+// @Tags Admin
+// @Produce json
+// @Param id path int true "Doctor ID" Format(int64)
+// @Success 200 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Failure 401 {object} res.Response
+// @Router /admin/approve-doctor/{id} [post]
 func (c *AdminHandler) ApproveDoctor(ctx *gin.Context) {
 	paramsId := ctx.Param("id")
 	doctorId, err := strconv.Atoi(paramsId)

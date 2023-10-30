@@ -56,6 +56,35 @@ definitions:
 info:
   contact: {}
 paths:
+  /admin/approve-doctor/{id}:
+    post:
+      description: Approve a doctor by ID
+      operationId: approve-doctor
+      parameters:
+      - description: Doctor ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Approve a Doctor
+      tags:
+      - Admin
   /admin/createadmin:
     post:
       consumes:
@@ -83,6 +112,79 @@ paths:
       summary: Create a new admin from admin panel
       tags:
       - User Authentication
+  /admin/delete-category:
+    delete:
+      description: Delete a category by ID
+      operationId: delete-category
+      parameters:
+      - description: Category ID
+        format: int64
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Delete Category
+      tags:
+      - Admin
+  /admin/list-category:
+    get:
+      description: List categories
+      operationId: list-categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: List Categories
+      tags:
+      - Admin
+  /admin/list-doctors-not-approved:
+    get:
+      description: Get a list of doctors that are not yet approved
+      operationId: list-doctors-not-approved
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: List Doctors Not Approved
+      tags:
+      - Admin
   /admin/login:
     post:
       consumes:

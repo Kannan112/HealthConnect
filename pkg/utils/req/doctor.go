@@ -4,7 +4,7 @@ type DoctorRegistration struct {
 	Name          string `json:"name"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
-	Specialise    string `json:"specialise"`
+	About         string `json:"about"`
 	LicenseNumber string `json:"license_number"`
 }
 

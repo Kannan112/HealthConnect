@@ -6,25 +6,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminSetUpRoute(engine *gin.Engine, AdminHandler *handler.AdminHandler) {
+func AdminSetUpRoute(engine *gin.Engine, adminHandler *handler.AdminHandler) {
+	// Create an "admin" route group
 	admin := engine.Group("/admin")
 	{
-		admin.POST("create", AdminHandler.AdminSignup)
-		admin.POST("login", AdminHandler.AdminLogin)
-		admin.GET("logout", AdminHandler.AdminLogout)
+		// Routes for admin authentication
+		admin.POST("/create", adminHandler.AdminSignup)
+		admin.POST("/login", adminHandler.AdminLogin)
+		admin.GET("/logout", adminHandler.AdminLogout)
+		admin.GET("/list-category", adminHandler.ListCategory)
 
-		category := admin.Group("category", middleware.AdminAuth)
+		// Create a "category" route group under "admin" with admin authentication middleware
+		category := admin.Group("/category", middleware.AdminAuth)
 		{
-			category.GET("", AdminHandler.ListCategory)          // Handler for listing categories
-			category.POST("create", AdminHandler.CreateCategory) // Handler for creating a category
-			category.DELETE("/:id", AdminHandler.DeleteCategory)
+			category.POST("/create", adminHandler.CreateCategory) // Handler for creating a category
+			category.DELETE("/:id", adminHandler.DeleteCategory)
 		}
 
-		Admindoctors := admin.Group("/doctors", middleware.AdminAuth)
+		// Create a "middler" route group under "admin" with admin authentication middleware
+		middler := admin.Group("", middleware.AdminAuth)
 		{
-			Admindoctors.GET("list", AdminHandler.ListDoctorsNotApproved)
-			Admindoctors.POST("/approve/:id", AdminHandler.ApproveDoctor)
+			middler.GET("/list-doctors-not-approved", adminHandler.ListDoctorsNotApproved)
+			middler.POST("/approve-doctor/:id", adminHandler.ApproveDoctor)
 		}
-
 	}
 }

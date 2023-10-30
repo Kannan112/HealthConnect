@@ -14,4 +14,8 @@ type DoctorRepository interface {
 	Profile(ctx context.Context, id int) (req.DoctorProfile, error)
 	CheckDoctorId(ctx context.Context, id int) (bool, error)
 	CategoryIdCheck(ctx context.Context, categoryId uint) (bool, error)
+
+
+	// conference room 
+	
 }

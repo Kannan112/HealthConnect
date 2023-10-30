@@ -88,7 +88,7 @@ func (c *AdminUseCase) ListCategory(ctx context.Context) ([]domain.Categories, e
 	return data, nil
 }
 
-func (c *AdminUseCase) ListDoctors(ctx context.Context) ([]res.Doctors, error) {
+func (c *AdminUseCase) ApprovePending(ctx context.Context) ([]res.Doctors, error) {
 	var data []res.Doctors
 	data, err := c.adminRepo.WaitingList(ctx)
 	if err != nil {
@@ -107,4 +107,12 @@ func (c *AdminUseCase) AdminVerify(ctx context.Context, doctor_id int) error {
 	}
 	return nil
 
+}
+
+func (c *AdminUseCase) ListDoctores(ctx context.Context) ([]res.Doctors, error) {
+	data, err := c.adminRepo.ListDoctores(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
