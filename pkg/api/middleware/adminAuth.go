@@ -12,11 +12,14 @@ func AdminAuth(c *gin.Context) {
 		c.Status(http.StatusUnauthorized)
 		return
 	}
+
 	adminID, err := ValidateJWT(TokenString)
 	if err != nil {
-		c.Status(http.StatusUnauthorized)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
+
 	c.Set("adminId", adminID)
+
 	c.Next()
 }

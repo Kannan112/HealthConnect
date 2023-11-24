@@ -8,27 +8,38 @@ import (
 )
 
 func ValidateJWT(TokenString string) (int, error) {
-	TokenValue, _ := jwt.Parse(TokenString, func(token *jwt.Token) (interface{}, error) {
+	tokenValue, err := jwt.Parse(TokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return []byte("strre"), nil
+		// Use your actual secret key here instead of "access"
+		return []byte("access token"), nil
 	})
-	var paramsId interface{}
-	if claims, ok := TokenValue.Claims.(jwt.MapClaims); ok && TokenValue.Valid {
-		paramsId = claims["id"]
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			return 0, fmt.Errorf("token expires")
-		}
+
+	if err != nil {
+
+		return 0, fmt.Errorf("JWT validation failed: %v", err.Error())
 	}
 
-	value, ok := paramsId.(float64)
-	if !ok {
-		return 0, fmt.Errorf("expected an int value, but got %T", paramsId)
+	if claims, ok := tokenValue.Claims.(jwt.MapClaims); ok && tokenValue.Valid {
+
+		paramsId, idOK := claims["user_id"].(float64)
+
+		//	role, roleOK := claims["role"].(string)
+		exp, expOK := claims["exp"].(float64)
+		if !idOK || !expOK {
+
+			return 0, fmt.Errorf("Missing or invalid claims in the JWT")
+		}
+
+		if float64(time.Now().Unix()) > exp {
+
+			return 0, fmt.Errorf("Token has expired")
+		}
+
+		return int(paramsId), nil
 	}
-	id := int(value)
-	return id, nil //id
+	return 0, fmt.Errorf("JWT claims are not valid")
 }
