@@ -5,7 +5,7 @@ import "time"
 type User struct {
 	ID          uint      `json:"id" gorm:"unique;not null"`
 	GoogleImage string    `json:"google_profile_image"`
-	UserName    string    `json:"user_name" gorm:"unique"`
+	UserName    string    `json:"user_name" gorm:"unique;not null"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
 	Email       string    `json:"email" gorm:"not null,unique"`

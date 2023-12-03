@@ -11,3 +11,8 @@ type UserRegister struct {
 	Email     string `json:"email" gorm:"not null,unique"`
 	Password  string `json:"password"`
 }
+
+type CategoriesUser struct {
+	Name        string
+	Description string
+}

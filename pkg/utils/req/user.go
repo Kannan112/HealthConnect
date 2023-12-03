@@ -6,8 +6,8 @@ type UserLogin struct {
 }
 
 type UserRegister struct {
-	FirstName string `json:"first_name"`
 	UserName  string `json:"user_name"`
+	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email" gorm:"not null,unique"`
 	Age       uint   `json:"age"`

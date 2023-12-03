@@ -3,59 +3,80 @@ package usecase
 import (
 	"context"
 	"errors"
-	"time"
 
+	"github.com/easy-health/pkg/api/middleware/token"
 	interfaces "github.com/easy-health/pkg/repository/interface"
 	services "github.com/easy-health/pkg/usecase/interface"
 	"github.com/easy-health/pkg/utils/req"
-	"github.com/golang-jwt/jwt"
+	"github.com/easy-health/pkg/utils/res"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userUseCase struct {
-	userRepo interfaces.UserRepository
+	user     interfaces.UserRepository
+	admin    interfaces.AdminRepository
+	category interfaces.CategoryRepository
 }
 
-func NewUserUseCase(repo interfaces.UserRepository) services.UserUseCase {
+func NewUserUseCase(UserRepo interfaces.UserRepository, AdminRepo interfaces.AdminRepository, categoryRepo interfaces.CategoryRepository) services.UserUseCase {
 	return &userUseCase{
-		userRepo: repo,
+		user:     UserRepo,
+		admin:    AdminRepo,
+		category: categoryRepo,
 	}
 }
 func (c *userUseCase) RegisterUser(ctx context.Context, reg req.UserRegister) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(reg.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
+
 	}
 	reg.Password = string(hashedPassword)
-	if err := c.userRepo.CreateUser(ctx, reg); err != nil {
+	if err := c.user.CreateUser(ctx, reg); err != nil {
 		return err
 	}
 	return nil
 }
-func (c *userUseCase) UserLogin(ctx context.Context, Login req.UserLogin) (string, error) {
-	exist, err := c.userRepo.CheckAccount(ctx, Login.Email)
+func (c *userUseCase) UserLogin(ctx context.Context, Login req.UserLogin) (map[string]string, error) {
+	exist, err := c.user.CheckAccount(ctx, Login.Email)
 	if err != nil {
-		return "failed", err
+		return nil, err
+
 	} else if !exist {
-		return "", errors.New("account not registered")
+		return nil, errors.New("account not registered")
+
 	}
-	UserProfile, err := c.userRepo.LoginUser(ctx, Login)
+	UserProfile, err := c.user.LoginUser(ctx, Login)
 	if err != nil {
-		return "", err
+		return nil, err
+
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(UserProfile.Password), []byte(Login.Password))
 	if err != nil {
-		return "", errors.New("wrong password")
-	}
-	claims := jwt.MapClaims{
-		"id":  UserProfile.ID,
-		"exp": time.Now().Add(time.Hour * 72).Unix(),
+		return nil, errors.New("wrong password")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte("strre"))
+	accessToken, err := token.GenerateAccessToken(int(UserProfile.ID), "user")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return ss, nil
+	refreshToken, err := token.GenerateRefreshToken(int(UserProfile.ID), "user")
+	if err != nil {
+		return nil, err
+	}
+	tokenMap := map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}
+
+	return tokenMap, nil
+}
+
+func (c *userUseCase) ListCategoryUser(ctx context.Context) ([]res.CategoriesUser, error) {
+	var data []res.CategoriesUser
+	data, err := c.user.ListCategoryUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

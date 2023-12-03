@@ -128,3 +128,10 @@ func (c *DoctorHandler) ListCategory(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "Available Categories", data))
 }
+
+// func (c *DoctorHandler) CreateSlot(ctx *gin.Context) {
+// 	doctorId, err := handlerurtl.DoctorIdFromContext(ctx)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to get doctorId from context", err.Error()))
+// 		return
+// 	}

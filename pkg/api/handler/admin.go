@@ -12,37 +12,28 @@ import (
 )
 
 type AdminHandler struct {
-	adminUseCase services.AdminUseCase
+	adminUseCase  services.AdminUseCase
+	doctorUseCase services.DoctorUseCase
 }
 
-func NewAdminHandler(adminUseCase services.AdminUseCase) *AdminHandler {
+func NewAdminHandler(adminUseCase services.AdminUseCase, doctorUseCase services.DoctorUseCase) *AdminHandler {
 	return &AdminHandler{
-		adminUseCase: adminUseCase,
+		adminUseCase:  adminUseCase,
+		doctorUseCase: doctorUseCase,
 	}
 }
-
-// @title Go + Gin E-Commerce API
-// @version 1.0.0
-// @description TechDeck is an E-commerce platform to purchase and sell Electronic itmes
-// @contact.name API Support
-// @securityDefinitions.apikey BearerTokenAuth
-// @in header
-// @name Authorization
-// @host localhost:8080
-// @BasePath
-// @query.collection.format multi
 
 // CreateAdmin
 // @Summary Create a new admin from admin panel
 // @ID AdminSignup
 // @Description admin creation
-// @Tags User Authentication
+// @Tags Admin
 // @Accept json
 // @Produce json
 // @Param admin body req.AdminLogin true "New Admin details"
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
-// @Router /admin/createadmin [post]
+// @Router /admin/create [post]
 func (c *AdminHandler) AdminSignup(ctx *gin.Context) {
 	var admin req.AdminLogin
 	err := ctx.BindJSON(&admin)
@@ -62,7 +53,7 @@ func (c *AdminHandler) AdminSignup(ctx *gin.Context) {
 // AdminLogin godoc
 // @Summary Admin login
 // @Description Logs in an admin user
-// @Tags User Authentication
+// @Tags Admin
 // @Accept json
 // @Produce json
 // @Param adminLogin body req.AdminLogin true "Admin login data"
@@ -77,28 +68,58 @@ func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 		return
 	}
 
-	Token, err := c.adminUseCase.AdminLogin(ctx, adminLogin)
+	tokens, err := c.adminUseCase.AdminLogin(ctx, adminLogin)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "Failed to login", err.Error()))
 		return
 	}
+
+	accessToken, hasAccessToken := tokens["access_token"]
+	_, hasRefreshToken := tokens["refresh_token"]
+
+	if !hasAccessToken || !hasRefreshToken {
+		// Handle the case where the required tokens are missing.
+		ctx.JSON(http.StatusInternalServerError, res.ErrorResponse(500, "Tokens not generated", "Tokens are missing"))
+		return
+	}
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("AdminAuth", Token, 3600*24*30, "", "", false, true)
-	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
+	ctx.SetCookie("AdminAuth", accessToken, 3600*24*30, "", "", false, true)
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", tokens))
 
 }
 
 // @Summary Admin Logout
 // @Description Logs out an admin user.
-// @Tags User Authentication
+// @Tags Admin
+// @Security BearerTokenAuth
 // @Produce json
 // @Success 200 {object} res.Response
 // @Router /admin/logout [get]]
 func (c *AdminHandler) AdminLogout(ctx *gin.Context) {
+	id, err := handlerurtl.AdminIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "you are not login", err.Error()))
+		return
+	}
 	ctx.SetCookie("AdminAuth", "", 3600*24*30, "", "", false, true)
+	if err := c.adminUseCase.AdminLogout(ctx, id); err != nil {
+		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
+		return
+	}
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logoutsuccessfuly", nil))
 }
 
+// @Summary create a new category
+// @Description Create a new category based on the provided data
+// @Tags Categories
+// @Accept json
+// @Produce json
+// @Param data body req.Category true "Category data to create"
+// @Success 202 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 422 {object} res.Response
+// @Router /admin/categories [post]
 func (c *AdminHandler) CreateCategory(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
@@ -117,23 +138,34 @@ func (c *AdminHandler) CreateCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, res.SuccessResponse(200, "created", data))
 }
 
-// @Summary List Categories
+// @Summary list categories
 // @Description List categories
 // @ID list-categories
-// @Tags Admin
+// @Tags Categories
 // @Produce json
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
-// @Router /admin/list-category [get]
+// @Router /admin/categories [get]
 func (c *AdminHandler) ListCategory(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
 		return
 	}
-	//add admin auth token check
-	data, err := c.adminUseCase.ListCategory(ctx)
+	page := ctx.DefaultQuery("page", "1")    // Set a default value for page if not provided
+	count := ctx.DefaultQuery("count", "10") // Set a default value for count if not provided
+	pageNo, err := strconv.Atoi(page)
+	if err != nil {
+		return
+	}
+
+	counts, err := strconv.Atoi(count)
+	if err != nil {
+		return
+	}
+
+	data, err := c.adminUseCase.ListCategory(ctx, pageNo, counts)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list category", err))
 		return
@@ -141,46 +173,84 @@ func (c *AdminHandler) ListCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "category list", data))
 }
 
-// @Summary Delete Category
+// @Summary delete categories
 // @Description Delete a category by ID
 // @ID delete-category
-// @Tags Admin
+// @Tags Categories
 // @Produce json
 // @Param id query int true "Category ID" Format(int64)
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
-// @Router /admin/delete-category [delete]
+// @Router /admin/categories [delete]
 func (c *AdminHandler) DeleteCategory(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
 		return
 	}
-	idParam := ctx.Query("id")
-	id, err := strconv.Atoi(idParam)
+	paramsID := ctx.Param("id")
+
+	categoryID, err := strconv.Atoi(paramsID)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID parameter"})
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "cant find categoryId", err))
 		return
 	}
-	if err := c.adminUseCase.DeleteCategory(ctx, id); err != nil {
+
+	if err := c.adminUseCase.DeleteCategory(ctx, categoryID); err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed", err))
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Category deleted successfully"})
 }
 
-// doctors
+// UpdateCategory updates a category.
+// @Summary Update a category by ID
+// @Description Update a category with new name and description by providing ID
+// @Tags Categories
+// @Accept json
+// @Produce json
+// @Param id path int true "Category ID"
+// @Param name query string true "New name of the category"
+// @Param description query string true "New description of the category"
+// @Success 200 {object} res.Response "Successfully updated category details"
+// @Failure 400 {object} res.Response "Please login"
+// @Failure 404 {object} res.Response "Failed to get ID" or "Failed to update category"
+// @Router /admin/categories/{id} [put]
+func (c *AdminHandler) UpdateCategory(ctx *gin.Context) {
+	_, err := handlerurtl.AdminIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
+		return
+	}
+	name := ctx.Query("name")
+	description := ctx.Query("description")
+	category := req.Category{
+		Name:        name,
+		Description: description,
+	}
+	id := ctx.Param("id")
+	categoryID, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, res.ErrorResponse(404, "failed to get id", err.Error()))
+		return
+	}
+	if err := c.adminUseCase.UpdateCategory(ctx, category, uint(categoryID)); err != nil {
+		ctx.JSON(http.StatusBadGateway, res.ErrorResponse(404, "failed to update category", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "updated category details", nil))
+}
 
 // @Summary List Doctors Not Approved
 // @Description Get a list of doctors that are not yet approved
 // @ID list-doctors-not-approved
-// @Tags Admin
+// @Tags  Admin Dashboard
 // @Produce json
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
-// @Router /admin/list-doctors-not-approved [get]
+// @Router /admin/doctor/not-approved [get]
 func (c *AdminHandler) ListDoctorsNotApproved(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
 	if err != nil {
@@ -189,7 +259,8 @@ func (c *AdminHandler) ListDoctorsNotApproved(ctx *gin.Context) {
 	}
 	data, err := c.adminUseCase.ApprovePending(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err))
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err.Error()))
+		return
 	}
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "list of doctors to approve", data))
 }
@@ -197,23 +268,23 @@ func (c *AdminHandler) ListDoctorsNotApproved(ctx *gin.Context) {
 // @Summary Approve a Doctor
 // @Description Approve a doctor by ID
 // @ID approve-doctor
-// @Tags Admin
+// @Tags Admin Dashboard
 // @Produce json
 // @Param id path int true "Doctor ID" Format(int64)
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
-// @Router /admin/approve-doctor/{id} [post]
+// @Router /admin/doctor/approve/{id} [post]
 func (c *AdminHandler) ApproveDoctor(ctx *gin.Context) {
+	_, err := handlerurtl.AdminIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
+		return
+	}
 	paramsId := ctx.Param("id")
 	doctorId, err := strconv.Atoi(paramsId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "cant find doctorId", err))
-		return
-	}
-	_, err = handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
 		return
 	}
 
@@ -223,4 +294,40 @@ func (c *AdminHandler) ApproveDoctor(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "approved", nil))
+}
+
+func (c *AdminHandler) GetDoctorProfile(ctx *gin.Context) {
+	_, err := handlerurtl.AdminIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
+		return
+	}
+	paramsId := ctx.Param("id")
+	doctorId, err := strconv.Atoi(paramsId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "cant find doctorId", err))
+		return
+	}
+	DoctorProfile, err := c.doctorUseCase.DoctorProfile(ctx, doctorId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to get details", err))
+		return
+	}
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "Doctor Profile", DoctorProfile))
+
+}
+
+
+func (c *AdminHandler) VerifiedDoctors(ctx *gin.Context) {
+	_, err := handlerurtl.AdminIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
+		return
+	}
+	data, err := c.adminUseCase.ListVerifiedDoctores(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err))
+		return
+	}
+	ctx.JSON(http.StatusAccepted, res.SuccessResponse(200, "verified doctors", data))
 }

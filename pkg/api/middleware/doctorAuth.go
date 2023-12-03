@@ -21,8 +21,7 @@ func DoctorAuth(c *gin.Context) {
 		return
 	}
 
-	// Set the doctorID in the Gin context
-	//fmt.Println(role)
+	// Set the doctorID in the Gin context	//fmt.Println(role)
 	c.Set("doctorId", doctorID)
 	c.Next()
 }

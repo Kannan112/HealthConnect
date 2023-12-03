@@ -19,6 +19,8 @@ func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
 		repository.NewAdminRepository,
 		repository.NewUserRepository,
 		repository.NewDoctorRepository,
+		repository.NewAuthRepository,
+		repository.NewCategoriesRepository,
 		usecase.NewUserUseCase,
 		usecase.NewAdminUseCase,
 		usecase.NewDoctorUseCase,

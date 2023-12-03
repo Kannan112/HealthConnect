@@ -14,20 +14,23 @@ func AdminSetUpRoute(engine *gin.Engine, adminHandler *handler.AdminHandler) {
 		admin.POST("/create", adminHandler.AdminSignup)
 		admin.POST("/login", adminHandler.AdminLogin)
 		admin.GET("/logout", adminHandler.AdminLogout)
-		admin.GET("/list-category", adminHandler.ListCategory)
 
 		// Create a "category" route group under "admin" with admin authentication middleware
-		category := admin.Group("/category", middleware.AdminAuth)
+		category := admin.Group("/categories", middleware.AdminAuth)
 		{
-			category.POST("/create", adminHandler.CreateCategory) // Handler for creating a category
+			category.GET("/", adminHandler.ListCategory)
+			category.POST("/", adminHandler.CreateCategory) // Handler for creating a category
+			//	category.PUT("/",adminHandler.)
 			category.DELETE("/:id", adminHandler.DeleteCategory)
 		}
+		//	admin.GET("/list-doctors-not-approved", adminHandler.ListDoctorsNotApproved, middleware.AdminAuth)
 
 		// Create a "middler" route group under "admin" with admin authentication middleware
-		middler := admin.Group("", middleware.AdminAuth)
+		doctor := admin.Group("doctor", middleware.AdminAuth)
 		{
-			middler.GET("/list-doctors-not-approved", adminHandler.ListDoctorsNotApproved)
-			middler.POST("/approve-doctor/:id", adminHandler.ApproveDoctor)
+			doctor.GET("/")
+			doctor.GET("/not-approved", adminHandler.ListDoctorsNotApproved, middleware.AdminAuth)
+			doctor.POST("/approve/:id", adminHandler.ApproveDoctor)
 		}
 	}
 }

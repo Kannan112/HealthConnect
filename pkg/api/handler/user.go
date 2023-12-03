@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/easy-health/pkg/api/middleware/handlerurtl"
 	"github.com/easy-health/pkg/config"
 	services "github.com/easy-health/pkg/usecase/interface"
 	"github.com/easy-health/pkg/utils/req"
@@ -48,7 +49,7 @@ func (c *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusAccepted, res.SuccessResponse(200, "user account registerd", nil))
-	return
+
 }
 
 // @Summary User Login
@@ -66,14 +67,14 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to bind", err))
 		return
 	}
-	SignedString, err := c.userUseCase.UserLogin(ctx, Login)
+	Tokens, err := c.userUseCase.UserLogin(ctx, Login)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to login", err.Error()))
 		return
 	}
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("UserAuth", SignedString, 3600*24*30, "", "", false, true)
-	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly", nil))
+	ctx.SetCookie("UserAuth", Tokens["access_token"], 3600*24*30, "", "", false, true)
+	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logined successfuly***", Tokens))
 }
 
 // @Summary Logout user from the app
@@ -85,4 +86,19 @@ func (c *UserHandler) Login(ctx *gin.Context) {
 func (c *UserHandler) Logout(ctx *gin.Context) {
 	ctx.SetCookie("UserAuth", "", 3600*24*30, "", "", false, true)
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "logout successfuly", nil))
+}
+
+func (c *UserHandler) ListCategory(ctx *gin.Context) {
+	_, err := handlerurtl.UserIdFromContext(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to verify", err.Error()))
+		return
+	}
+	categories, err := c.userUseCase.ListCategoryUser(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusBadRequest, res.SuccessResponse(200, "listing categories", categories))
+
 }

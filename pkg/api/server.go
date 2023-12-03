@@ -15,6 +15,17 @@ type ServerHTTP struct {
 	engine *gin.Engine
 }
 
+// @title						E-commerce Application Backend API
+// @description				Backend API built with Golang using Clean Code architecture. \nGithub: [https://github.com/kannan112/easy-health].
+// @contact.name				For API Support
+// @contact.email				abhinandarun369@gmail.com
+// @license.name				MIT
+// @license.url				https://opensource.org/licenses/MIT
+// @SecurityDefinitions.apikey	BearerAuth
+// @Name						Authorization
+// @In							header
+// @Description				Add prefix of Bearer before  token Ex: "Bearer token"
+// @Query.collection.format	multi
 func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.DoctorHandler, adminHandler *handler.AdminHandler) *ServerHTTP {
 	// Create a new Gin engine
 	engine := gin.New()

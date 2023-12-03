@@ -14,19 +14,21 @@ import (
 )
 
 type DoctorUseCase struct {
-	doctorRepo interfaces.DoctorRepository
-	adminRepo  interfaces.AdminRepository
+	doctorRepo   interfaces.DoctorRepository
+	adminRepo    interfaces.AdminRepository
+	categoryRepo interfaces.CategoryRepository
 }
 
-func NewDoctorUseCase(doctorRepo interfaces.DoctorRepository, adminRepo interfaces.AdminRepository) services.DoctorUseCase {
+func NewDoctorUseCase(doctorRepo interfaces.DoctorRepository, adminRepo interfaces.AdminRepository, categoryRepo interfaces.CategoryRepository) services.DoctorUseCase {
 	return &DoctorUseCase{
-		doctorRepo: doctorRepo,
-		adminRepo:  adminRepo,
+		doctorRepo:   doctorRepo,
+		adminRepo:    adminRepo,
+		categoryRepo: categoryRepo,
 	}
 }
 
 func (connect *DoctorUseCase) Registration(ctx context.Context, data req.DoctorRegistration, categoryId uint) error {
-	category, err := connect.doctorRepo.CategoryIdCheck(ctx, categoryId)
+	category, err := connect.categoryRepo.CategoryIdCheck(ctx, categoryId)
 	if err != nil {
 		return err
 	}
@@ -59,7 +61,7 @@ func (c *DoctorUseCase) DoctorLogin(ctx context.Context, login req.DoctorLogin) 
 	if err = bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(login.Password)); err != nil {
 		return "", errors.New("wrong password")
 	}
-	if data.Approved != true {
+	if data.Verified != true {
 		return "", errors.New("waiting for admin to approve")
 	}
 	claims := jwt.MapClaims{
@@ -67,12 +69,12 @@ func (c *DoctorUseCase) DoctorLogin(ctx context.Context, login req.DoctorLogin) 
 		"exp": time.Now().Add(time.Hour * 72).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte("strre"))
+	signedToken, err := token.SignedString([]byte("strre"))
 	if err != nil {
 		return "", err
 	}
 
-	return ss, nil
+	return signedToken, nil
 }
 
 func (c *DoctorUseCase) DoctorProfile(ctx context.Context, doctorId int) (req.DoctorProfile, error) {

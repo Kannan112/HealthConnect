@@ -21,9 +21,3 @@ type DoctorProfile struct {
 	AverageRating int
 	Reviews       []string //incomplete
 }
-
-type Categories struct {
-	ID          int    `json:"id" gorm:"unique;not null"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
