@@ -1,9 +1,16 @@
 definitions:
   req.AdminLogin:
     properties:
-      name:
+      email:
         type: string
       password:
+        type: string
+    type: object
+  req.Category:
+    properties:
+      description:
+        type: string
+      name:
         type: string
     type: object
   req.DoctorLogin:
@@ -15,6 +22,8 @@ definitions:
     type: object
   req.DoctorRegistration:
     properties:
+      about:
+        type: string
       email:
         type: string
       license_number:
@@ -22,8 +31,6 @@ definitions:
       name:
         type: string
       password:
-        type: string
-      specialise:
         type: string
     type: object
   req.UserLogin:
@@ -35,6 +42,8 @@ definitions:
     type: object
   req.UserRegister:
     properties:
+      age:
+        type: integer
       email:
         type: string
       first_name:
@@ -42,6 +51,8 @@ definitions:
       last_name:
         type: string
       password:
+        type: string
+      user_name:
         type: string
     type: object
   res.Response:
@@ -54,9 +65,166 @@ definitions:
         type: integer
     type: object
 info:
-  contact: {}
+  contact:
+    email: abhinandarun369@gmail.com
+    name: For API Support
+  description: 'Backend API built with Golang using Clean Code architecture. \nGithub:
+    [https://github.com/kannan112/easy-health].'
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: E-commerce Application Backend API
 paths:
-  /admin/approve-doctor/{id}:
+  /admin/categories:
+    delete:
+      description: Delete a category by ID
+      operationId: delete-category
+      parameters:
+      - description: Category ID
+        format: int64
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: delete categories
+      tags:
+      - Categories
+    get:
+      description: List categories
+      operationId: list-categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: list categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category based on the provided data
+      parameters:
+      - description: Category data to create
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/req.Category'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: create a new category
+      tags:
+      - Categories
+  /admin/categories/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update a category with new name and description by providing ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New name of the category
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: New description of the category
+        in: query
+        name: description
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated category details
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Please login
+          schema:
+            $ref: '#/definitions/res.Response'
+        "404":
+          description: Failed to get ID" or "Failed to update category
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Update a category by ID
+      tags:
+      - Categories
+  /admin/create:
+    post:
+      consumes:
+      - application/json
+      description: admin creation
+      operationId: AdminSignup
+      parameters:
+      - description: New Admin details
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/req.AdminLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Create a new admin from admin panel
+      tags:
+      - Admin
+  /admin/doctor/approve/{id}:
     post:
       description: Approve a doctor by ID
       operationId: approve-doctor
@@ -84,86 +252,8 @@ paths:
             $ref: '#/definitions/res.Response'
       summary: Approve a Doctor
       tags:
-      - Admin
-  /admin/createadmin:
-    post:
-      consumes:
-      - application/json
-      description: admin creation
-      operationId: AdminSignup
-      parameters:
-      - description: New Admin details
-        in: body
-        name: admin
-        required: true
-        schema:
-          $ref: '#/definitions/req.AdminLogin'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/res.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/res.Response'
-      summary: Create a new admin from admin panel
-      tags:
-      - User Authentication
-  /admin/delete-category:
-    delete:
-      description: Delete a category by ID
-      operationId: delete-category
-      parameters:
-      - description: Category ID
-        format: int64
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/res.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/res.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/res.Response'
-      summary: Delete Category
-      tags:
-      - Admin
-  /admin/list-category:
-    get:
-      description: List categories
-      operationId: list-categories
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/res.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/res.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/res.Response'
-      summary: List Categories
-      tags:
-      - Admin
-  /admin/list-doctors-not-approved:
+      - Admin Dashboard
+  /admin/doctor/not-approved:
     get:
       description: Get a list of doctors that are not yet approved
       operationId: list-doctors-not-approved
@@ -184,7 +274,7 @@ paths:
             $ref: '#/definitions/res.Response'
       summary: List Doctors Not Approved
       tags:
-      - Admin
+      - Admin Dashboard
   /admin/login:
     post:
       consumes:
@@ -206,7 +296,7 @@ paths:
             $ref: '#/definitions/res.Response'
       summary: Admin login
       tags:
-      - User Authentication
+      - Admin
   /admin/logout:
     get:
       description: Logs out an admin user.
@@ -217,9 +307,11 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: Admin Logout
       tags:
-      - User Authentication
+      - Admin
   /doctor/{categoryid}/registration:
     post:
       consumes:
@@ -382,4 +474,10 @@ paths:
       summary: Register a new user account
       tags:
       - User Authentication
+securityDefinitions:
+  BearerAuth:
+    description: 'Add prefix of Bearer before  token Ex: "Bearer token"'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
