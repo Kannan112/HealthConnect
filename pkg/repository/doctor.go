@@ -73,12 +73,3 @@ func (c *DoctorDatabase) CheckDoctorId(ctx context.Context, id int) (bool, error
 	}
 	return check, nil
 }
-
-func (c *DoctorDatabase) CategoryIdCheck(ctx context.Context, categoryId uint) (bool, error) {
-	var check bool
-	query := `select Exists(select * from categories where id=$1)`
-	if err := c.DB.Raw(query, categoryId).Scan(&check).Error; err != nil {
-		return false, err
-	}
-	return check, nil
-}

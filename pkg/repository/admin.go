@@ -20,12 +20,21 @@ func NewAdminRepository(DB *gorm.DB) interfaces.AdminRepository {
 	return &AdminDatabase{DB}
 }
 
+func (c *AdminDatabase) AdminCheck(ctx context.Context, Email string) (bool, error) {
+	var check bool
+	query := `SELECT EXISTS(select 1 FROM admins where email=$1)`
+	if err := c.DB.Raw(query, Email).Scan(&check).Error; err != nil {
+		return false, err
+	}
+	return check, nil
+}
+
 func (c *AdminDatabase) AdminSignup(ctx context.Context, AdminSignup req.AdminLogin) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(AdminSignup.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	query := `INSERT INTO admins (name, password) VALUES ($1, $2)`
+	query := `INSERT INTO admins (email, password) VALUES ($1, $2)`
 	err = c.DB.Exec(query, AdminSignup.Email, hashedPassword).Error
 	if err != nil {
 		return err
@@ -34,12 +43,21 @@ func (c *AdminDatabase) AdminSignup(ctx context.Context, AdminSignup req.AdminLo
 }
 
 func (c *AdminDatabase) AdminLogin(ctx context.Context, AdminLogin req.AdminLogin) (data domain.Admin, err error) {
-	query := `select * from admins where name=$1`
+	query := `select * from admins where email=$1`
 	err = c.DB.Raw(query, AdminLogin.Email).Scan(&data).Error
 	if err != nil {
 		return data, err
 	}
 	return data, nil
+
+}
+func (c *AdminDatabase) OnlineStatusUpdate(ctx context.Context, adminID uint, value bool) error {
+	query := `UPDATE admins SET online_status = $1 WHERE id = $2`
+	err := c.DB.Exec(query, value, adminID).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *AdminDatabase) CategoryCheck(categoryName string) (bool, error) {
@@ -89,7 +107,7 @@ func (c *AdminDatabase) ListDoctores(ctx context.Context) ([]res.Doctors, error)
 
 func (c *AdminDatabase) WaitingList(ctx context.Context) ([]res.Doctors, error) {
 	var profile []res.Doctors
-	query := `select * from doctors where approved=false`
+	query := `select * from doctors where Verified=false`
 	if err := c.DB.Raw(query).Scan(&profile).Error; err != nil {
 		return profile, err
 	}
@@ -101,4 +119,13 @@ func (c *AdminDatabase) AdminVerify(ctx context.Context, doctor_id int) error {
 		return err
 	}
 	return nil
+}
+
+func (c *AdminDatabase) ListVerifiedDoctores(ctx context.Context) ([]res.Doctors, error) {
+	var profile []res.Doctors
+	query := `select * from doctors where approved=true`
+	if err := c.DB.Raw(query).Scan(&profile).Error; err != nil {
+		return profile, err
+	}
+	return profile, nil
 }
