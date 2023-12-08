@@ -121,10 +121,11 @@ func (c *AdminDatabase) AdminVerify(ctx context.Context, doctor_id int) error {
 	return nil
 }
 
-func (c *AdminDatabase) ListVerifiedDoctores(ctx context.Context) ([]res.Doctors, error) {
+func (c *AdminDatabase) ListVerifiedDoctores(ctx context.Context, offset int, pageSize int) ([]res.Doctors, error) {
 	var profile []res.Doctors
-	query := `select * from doctors where approved=true`
-	if err := c.DB.Raw(query).Scan(&profile).Error; err != nil {
+	query := `SELECT * FROM doctors WHERE verified = true OFFSET $1 LIMIT $2;`
+
+	if err := c.DB.Raw(query, offset, pageSize).Scan(&profile).Error; err != nil {
 		return profile, err
 	}
 	return profile, nil

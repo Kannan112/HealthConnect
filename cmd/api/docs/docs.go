@@ -10,12 +10,8 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "For API Support",
-            "email": "abhinandarun369@gmail.com"
-        },
-        "license": {
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
+            "name": "API Support",
+            "email": "abhinandarun11@gmail.com"
         },
         "version": "{{.Version}}"
     },
@@ -24,6 +20,11 @@ const docTemplate = `{
     "paths": {
         "/admin/categories": {
             "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "List categories",
                 "produces": [
                     "application/json"
@@ -33,6 +34,20 @@ const docTemplate = `{
                 ],
                 "summary": "list categories",
                 "operationId": "list-categories",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page (default 10)",
+                        "name": "count",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -55,6 +70,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Create a new category based on the provided data",
                 "consumes": [
                     "application/json"
@@ -105,6 +125,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Delete a category by ID",
                 "produces": [
                     "application/json"
@@ -147,7 +172,12 @@ const docTemplate = `{
             }
         },
         "/admin/categories/{id}": {
-            "put": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Update a category with new name and description by providing ID",
                 "consumes": [
                     "application/json"
@@ -245,8 +275,56 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/doctor/approve/{id}": {
-            "post": {
+        "/admin/doctor-profile/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Get the profile of a doctor by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Dashboard"
+                ],
+                "summary": "Get doctor profile by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Doctor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/doctors/approve/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Approve a doctor by ID",
                 "produces": [
                     "application/json"
@@ -288,8 +366,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/doctor/not-approved": {
+        "/admin/doctors/not-approved": {
             "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Get a list of doctors that are not yet approved",
                 "produces": [
                     "application/json"
@@ -314,6 +397,54 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/doctors/verified": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Get a list of verified doctors with pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Dashboard"
+                ],
+                "summary": "Get verified doctors",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page (default 10)",
+                        "name": "count",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/res.Response"
                         }
@@ -732,8 +863,7 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Add prefix of Bearer before  token Ex: \"Bearer token\"",
+        "BearerTokenAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -743,12 +873,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "E-commerce Application Backend API",
-	Description:      "Backend API built with Golang using Clean Code architecture. \\nGithub: [https://github.com/kannan112/easy-health].",
+	Title:            "Go + Gin Health-Connect Application Backend API",
+	Description:      "Backend API built with Golang using Clean Code architecture For Hospitals",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

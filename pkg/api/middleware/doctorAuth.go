@@ -2,17 +2,19 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 func DoctorAuth(c *gin.Context) {
-	tokenString, err := c.Cookie("DoctorAuth")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	authorizationHeader := c.GetHeader("Authorization")
+	if authorizationHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization token"})
 		c.Abort()
 		return
 	}
+	tokenString := strings.TrimPrefix(authorizationHeader, "Bearer ")
 
 	doctorID, err := ValidateJWT(tokenString)
 	if err != nil {

@@ -2,18 +2,19 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 func UserAuth(c *gin.Context) {
-	tokenString, err := c.Cookie("UserAuth")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	authorizationHeader := c.GetHeader("Authorization")
+	if authorizationHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization token"})
 		c.Abort()
 		return
 	}
-	// Assuming this is the correct way to access your configuration
+	tokenString := strings.TrimPrefix(authorizationHeader, "Bearer ")
 
 	userID, err := ValidateJWT(tokenString)
 	if err != nil {

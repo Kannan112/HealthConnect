@@ -172,8 +172,12 @@ func (c *AdminUseCase) ListDoctores(ctx context.Context) ([]res.Doctors, error) 
 	return data, nil
 }
 
-func (c *AdminUseCase) ListVerifiedDoctores(ctx context.Context) ([]res.Doctors, error) {
-	data, err := c.adminRepo.ListVerifiedDoctores(ctx)
+func (c *AdminUseCase) ListVerifiedDoctores(ctx context.Context, page int, pageSize int) ([]res.Doctors, error) {
+	if page <= 0 {
+		page = 1
+	}
+	offset := (page - 1) * pageSize
+	data, err := c.adminRepo.ListVerifiedDoctores(ctx, offset, pageSize)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get data from doctors%v", err.Error())
 	}

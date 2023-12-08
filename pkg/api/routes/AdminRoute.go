@@ -16,7 +16,7 @@ func AdminSetUpRoute(engine *gin.Engine, adminHandler *handler.AdminHandler) {
 		admin.GET("/logout", adminHandler.AdminLogout)
 
 		// Create a "category" route group under "admin" with admin authentication middleware
-		category := admin.Group("/categories", middleware.AdminAuth)
+		category := admin.Group("/categories", middleware.AdminAuthMiddleware)
 		{
 			category.GET("/", adminHandler.ListCategory)
 			category.POST("/", adminHandler.CreateCategory) // Handler for creating a category
@@ -26,11 +26,12 @@ func AdminSetUpRoute(engine *gin.Engine, adminHandler *handler.AdminHandler) {
 		//	admin.GET("/list-doctors-not-approved", adminHandler.ListDoctorsNotApproved, middleware.AdminAuth)
 
 		// Create a "middler" route group under "admin" with admin authentication middleware
-		doctor := admin.Group("doctor", middleware.AdminAuth)
+		doctor := admin.Group("doctors", middleware.AdminAuthMiddleware)
 		{
 			doctor.GET("/")
-			doctor.GET("/not-approved", adminHandler.ListDoctorsNotApproved, middleware.AdminAuth)
-			doctor.POST("/approve/:id", adminHandler.ApproveDoctor)
+			doctor.GET("/verified", adminHandler.VerifiedDoctors)
+			doctor.GET("/not-approved", adminHandler.ListDoctorsNotApproved, middleware.AdminAuthMiddleware)
+			doctor.PATCH("/approve/:id", adminHandler.ApproveDoctor)
 		}
 	}
 }

@@ -19,7 +19,7 @@ type AdminUseCase interface {
 	UpdateCategory(ctx context.Context, category req.Category, id uint) error
 
 	//doctorProfile
-	ListVerifiedDoctores(ctx context.Context) ([]res.Doctors, error)
+	ListVerifiedDoctores(ctx context.Context, page int, pageSize int) ([]res.Doctors, error)
 	ListDoctores(ctx context.Context) ([]res.Doctors, error)
 	ApprovePending(ctx context.Context) ([]res.Doctors, error)
 	AdminVerify(ctx context.Context, doctor_id int) error

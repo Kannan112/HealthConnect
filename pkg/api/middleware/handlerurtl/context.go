@@ -10,10 +10,8 @@ import (
 func AdminIdFromContext(c *gin.Context) (int, error) {
 	id, exist := c.Get("adminId")
 	if !exist {
-
 		return 0, fmt.Errorf("Value not found")
 	}
-	fmt.Println("--->", id)
 	if id == nil {
 		return 0, fmt.Errorf("adminId not found in context")
 	}

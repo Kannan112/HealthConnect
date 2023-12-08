@@ -66,14 +66,11 @@ definitions:
     type: object
 info:
   contact:
-    email: abhinandarun369@gmail.com
-    name: For API Support
-  description: 'Backend API built with Golang using Clean Code architecture. \nGithub:
-    [https://github.com/kannan112/easy-health].'
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-  title: E-commerce Application Backend API
+    email: abhinandarun11@gmail.com
+    name: API Support
+  description: Backend API built with Golang using Clean Code architecture For Hospitals
+  title: Go + Gin Health-Connect Application Backend API
+  version: 1.0.0
 paths:
   /admin/categories:
     delete:
@@ -101,12 +98,23 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: delete categories
       tags:
       - Categories
     get:
       description: List categories
       operationId: list-categories
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page (default 10)
+        in: query
+        name: count
+        type: integer
       produces:
       - application/json
       responses:
@@ -122,6 +130,8 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: list categories
       tags:
       - Categories
@@ -155,11 +165,13 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: create a new category
       tags:
       - Categories
   /admin/categories/{id}:
-    put:
+    patch:
       consumes:
       - application/json
       description: Update a category with new name and description by providing ID
@@ -194,6 +206,8 @@ paths:
           description: Failed to get ID" or "Failed to update category
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: Update a category by ID
       tags:
       - Categories
@@ -224,8 +238,35 @@ paths:
       summary: Create a new admin from admin panel
       tags:
       - Admin
-  /admin/doctor/approve/{id}:
-    post:
+  /admin/doctor-profile/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get the profile of a doctor by their ID
+      parameters:
+      - description: Doctor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get doctor profile by ID
+      tags:
+      - Admin Dashboard
+  /admin/doctors/approve/{id}:
+    patch:
       description: Approve a doctor by ID
       operationId: approve-doctor
       parameters:
@@ -250,10 +291,12 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: Approve a Doctor
       tags:
       - Admin Dashboard
-  /admin/doctor/not-approved:
+  /admin/doctors/not-approved:
     get:
       description: Get a list of doctors that are not yet approved
       operationId: list-doctors-not-approved
@@ -272,7 +315,39 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
       summary: List Doctors Not Approved
+      tags:
+      - Admin Dashboard
+  /admin/doctors/verified:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of verified doctors with pagination
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page (default 10)
+        in: query
+        name: count
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/res.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/res.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get verified doctors
       tags:
       - Admin Dashboard
   /admin/login:
@@ -475,8 +550,7 @@ paths:
       tags:
       - User Authentication
 securityDefinitions:
-  BearerAuth:
-    description: 'Add prefix of Bearer before  token Ex: "Bearer token"'
+  BearerTokenAuth:
     in: header
     name: Authorization
     type: apiKey

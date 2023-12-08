@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -91,9 +92,9 @@ func (c *AdminHandler) AdminLogin(ctx *gin.Context) {
 // @Summary Admin Logout
 // @Description Logs out an admin user.
 // @Tags Admin
-// @Security BearerTokenAuth
 // @Produce json
 // @Success 200 {object} res.Response
+// @Security BearerTokenAuth
 // @Router /admin/logout [get]]
 func (c *AdminHandler) AdminLogout(ctx *gin.Context) {
 	id, err := handlerurtl.AdminIdFromContext(ctx)
@@ -119,6 +120,7 @@ func (c *AdminHandler) AdminLogout(ctx *gin.Context) {
 // @Failure 400 {object} res.Response
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 422 {object} res.Response
+// @Security BearerTokenAuth
 // @Router /admin/categories [post]
 func (c *AdminHandler) CreateCategory(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
@@ -146,13 +148,11 @@ func (c *AdminHandler) CreateCategory(ctx *gin.Context) {
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
+// @Param page query integer false "Page number (default 1)"
+// @Param count query integer false "Number of items per page (default 10)"
+// @Security BearerTokenAuth
 // @Router /admin/categories [get]
 func (c *AdminHandler) ListCategory(ctx *gin.Context) {
-	_, err := handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
-		return
-	}
 	page := ctx.DefaultQuery("page", "1")    // Set a default value for page if not provided
 	count := ctx.DefaultQuery("count", "10") // Set a default value for count if not provided
 	pageNo, err := strconv.Atoi(page)
@@ -182,6 +182,7 @@ func (c *AdminHandler) ListCategory(ctx *gin.Context) {
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
+// @Security BearerTokenAuth
 // @Router /admin/categories [delete]
 func (c *AdminHandler) DeleteCategory(ctx *gin.Context) {
 	_, err := handlerurtl.AdminIdFromContext(ctx)
@@ -216,13 +217,10 @@ func (c *AdminHandler) DeleteCategory(ctx *gin.Context) {
 // @Success 200 {object} res.Response "Successfully updated category details"
 // @Failure 400 {object} res.Response "Please login"
 // @Failure 404 {object} res.Response "Failed to get ID" or "Failed to update category"
-// @Router /admin/categories/{id} [put]
+// @Security BearerTokenAuth
+// @Router /admin/categories/{id} [patch]
 func (c *AdminHandler) UpdateCategory(ctx *gin.Context) {
-	_, err := handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
-		return
-	}
+
 	name := ctx.Query("name")
 	description := ctx.Query("description")
 	category := req.Category{
@@ -250,13 +248,10 @@ func (c *AdminHandler) UpdateCategory(ctx *gin.Context) {
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
-// @Router /admin/doctor/not-approved [get]
+// @Security BearerTokenAuth
+// @Router /admin/doctors/not-approved [get]
 func (c *AdminHandler) ListDoctorsNotApproved(ctx *gin.Context) {
-	_, err := handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
-		return
-	}
+
 	data, err := c.adminUseCase.ApprovePending(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err.Error()))
@@ -274,13 +269,10 @@ func (c *AdminHandler) ListDoctorsNotApproved(ctx *gin.Context) {
 // @Success 200 {object} res.Response
 // @Failure 400 {object} res.Response
 // @Failure 401 {object} res.Response
-// @Router /admin/doctor/approve/{id} [post]
+// @Security BearerTokenAuth
+// @Router /admin/doctors/approve/{id} [patch]
 func (c *AdminHandler) ApproveDoctor(ctx *gin.Context) {
-	_, err := handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
-		return
-	}
+
 	paramsId := ctx.Param("id")
 	doctorId, err := strconv.Atoi(paramsId)
 	if err != nil {
@@ -296,12 +288,19 @@ func (c *AdminHandler) ApproveDoctor(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.SuccessResponse(200, "approved", nil))
 }
 
+// GetDoctorProfile godoc
+// @Summary Get doctor profile by ID
+// @Description Get the profile of a doctor by their ID
+// @Tags Admin Dashboard
+// @Accept json
+// @Produce json
+// @Param id path integer true "Doctor ID"
+// @Success 200 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Security BearerTokenAuth
+// @Router /admin/doctor-profile/{id} [get]
 func (c *AdminHandler) GetDoctorProfile(ctx *gin.Context) {
-	_, err := handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
-		return
-	}
+
 	paramsId := ctx.Param("id")
 	doctorId, err := strconv.Atoi(paramsId)
 	if err != nil {
@@ -317,14 +316,29 @@ func (c *AdminHandler) GetDoctorProfile(ctx *gin.Context) {
 
 }
 
-
+// VerifiedDoctors godoc
+// @Summary Get verified doctors
+// @Description Get a list of verified doctors with pagination
+// @Tags Admin Dashboard
+// @Accept  json
+// @Produce  json
+// @Param page query integer false "Page number (default 1)"
+// @Param count query integer false "Number of items per page (default 10)"
+// @Success 202 {object} res.Response
+// @Failure 400 {object} res.Response
+// @Security BearerTokenAuth
+// @Router /admin/doctors/verified [get]
 func (c *AdminHandler) VerifiedDoctors(ctx *gin.Context) {
-	_, err := handlerurtl.AdminIdFromContext(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, res.ErrorResponse(400, "please login", err.Error()))
+	page := ctx.DefaultQuery("page", "1")    // Set a default value for page if not provided
+	count := ctx.DefaultQuery("count", "10") // Set a default value for count if not provided
+	pageNo, pageError := strconv.Atoi(page)
+	counts, countError := strconv.Atoi(count)
+	if pageError != nil || countError != nil {
+		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to get details", errors.Join(pageError, countError)))
 		return
 	}
-	data, err := c.adminUseCase.ListVerifiedDoctores(ctx)
+
+	data, err := c.adminUseCase.ListVerifiedDoctores(ctx, pageNo, counts)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.ErrorResponse(400, "failed to list", err))
 		return

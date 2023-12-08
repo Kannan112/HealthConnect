@@ -1,20 +1,22 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Backend API built with Golang using Clean Code architecture. \\nGithub: [https://github.com/kannan112/easy-health].",
-        "title": "E-commerce Application Backend API",
+        "description": "Backend API built with Golang using Clean Code architecture For Hospitals",
+        "title": "Go + Gin Health-Connect Application Backend API",
         "contact": {
-            "name": "For API Support",
-            "email": "abhinandarun369@gmail.com"
+            "name": "API Support",
+            "email": "abhinandarun11@gmail.com"
         },
-        "license": {
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
-        }
+        "version": "1.0.0"
     },
     "paths": {
         "/admin/categories": {
             "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "List categories",
                 "produces": [
                     "application/json"
@@ -24,6 +26,20 @@
                 ],
                 "summary": "list categories",
                 "operationId": "list-categories",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page (default 10)",
+                        "name": "count",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -46,6 +62,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Create a new category based on the provided data",
                 "consumes": [
                     "application/json"
@@ -96,6 +117,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Delete a category by ID",
                 "produces": [
                     "application/json"
@@ -138,7 +164,12 @@
             }
         },
         "/admin/categories/{id}": {
-            "put": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Update a category with new name and description by providing ID",
                 "consumes": [
                     "application/json"
@@ -236,8 +267,56 @@
                 }
             }
         },
-        "/admin/doctor/approve/{id}": {
-            "post": {
+        "/admin/doctor-profile/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Get the profile of a doctor by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Dashboard"
+                ],
+                "summary": "Get doctor profile by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Doctor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/doctors/approve/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Approve a doctor by ID",
                 "produces": [
                     "application/json"
@@ -279,8 +358,13 @@
                 }
             }
         },
-        "/admin/doctor/not-approved": {
+        "/admin/doctors/not-approved": {
             "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
                 "description": "Get a list of doctors that are not yet approved",
                 "produces": [
                     "application/json"
@@ -305,6 +389,54 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/doctors/verified": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Get a list of verified doctors with pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Dashboard"
+                ],
+                "summary": "Get verified doctors",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page (default 10)",
+                        "name": "count",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/res.Response"
                         }
@@ -723,8 +855,7 @@
         }
     },
     "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Add prefix of Bearer before  token Ex: \"Bearer token\"",
+        "BearerTokenAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
