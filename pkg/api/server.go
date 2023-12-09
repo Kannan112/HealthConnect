@@ -31,7 +31,7 @@ func NewServerHTTP(userHandler *handler.UserHandler, doctorHandler *handler.Doct
 
 	// Use Gin's built-in logger middleware
 	engine.Use(gin.Logger())
-
+	engine.LoadHTMLGlob("views/*.html")
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"} // Allow requests from your React app's origin
 	config.AllowHeaders = []string{"*"}                     // Allow any headers

@@ -387,6 +387,42 @@ paths:
       summary: Admin Logout
       tags:
       - Admin
+  /auth/google-auth:
+    get:
+      description: API for user to load google login page
+      operationId: UserGoogleAuthLoginPage
+      responses:
+        "200":
+          description: Successfully google login page loaded
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: To load google login page (User)
+      tags:
+      - User Authentication
+  /auth/google-auth/callback:
+    post:
+      description: API for google to callback after authentication
+      operationId: UserGoogleAuthCallBack
+      responses:
+        "200":
+          description: Successfully logged in with google
+          schema:
+            $ref: '#/definitions/res.Response'
+        "500":
+          description: Failed Login with google
+          schema:
+            $ref: '#/definitions/res.Response'
+      summary: Google auth callback (User)
+      tags:
+      - User Authentication
+  /auth/google-auth/initialize:
+    get:
+      description: API for user to initialize google auth
+      operationId: UserGoogleAuthInitialize
+      responses: {}
+      summary: Initialize google auth (User)
+      tags:
+      - User Authentication
   /doctor/{categoryid}/registration:
     post:
       consumes:

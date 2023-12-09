@@ -511,6 +511,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/google-auth": {
+            "get": {
+                "description": "API for user to load google login page",
+                "tags": [
+                    "User Authentication"
+                ],
+                "summary": "To load google login page (User)",
+                "operationId": "UserGoogleAuthLoginPage",
+                "responses": {
+                    "200": {
+                        "description": "Successfully google login page loaded",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/google-auth/callback": {
+            "post": {
+                "description": "API for google to callback after authentication",
+                "tags": [
+                    "User Authentication"
+                ],
+                "summary": "Google auth callback (User)",
+                "operationId": "UserGoogleAuthCallBack",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged in with google",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed Login with google",
+                        "schema": {
+                            "$ref": "#/definitions/res.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/google-auth/initialize": {
+            "get": {
+                "description": "API for user to initialize google auth",
+                "tags": [
+                    "User Authentication"
+                ],
+                "summary": "Initialize google auth (User)",
+                "operationId": "UserGoogleAuthInitialize",
+                "responses": {}
+            }
+        },
         "/doctor/categories": {
             "get": {
                 "description": "List available categories for doctors.",

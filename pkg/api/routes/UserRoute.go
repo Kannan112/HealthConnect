@@ -7,13 +7,17 @@ import (
 )
 
 func AuthSetUpRoute(engine *gin.Engine, UserHandler *handler.UserHandler) {
-	//auth := engine.Group("/auth")
+	auth := engine.Group("/auth")
+	auth.GET("google/login", UserHandler.GoogleLogin)
+	auth.GET("google/callback", UserHandler.GoogleAuthCallback)
 
-	// Routes for user authentication
-	//auth.GET("/login", UserHandler.UserGoogleAuthLoginPage)
-	// Add more authentication routes as needed
+	auth.GET("/google-auth", UserHandler.UserGoogleAuthLoginPage)
+	auth.GET("google-auth/callback", UserHandler.UserGoogleAuthCallBack)
+	auth.GET("/google-auth/initialize", UserHandler.UserGoogleAuthInitialize)
+
 	user := engine.Group("/user")
 	{
+
 		user.POST("/login", UserHandler.Login)
 		user.POST("/register", UserHandler.Register)
 		user.GET("/logout", UserHandler.Logout)
