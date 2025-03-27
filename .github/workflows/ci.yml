@@ -1,0 +1,29 @@
+stages:
+  - setup
+  - test
+
+setup:
+  stage: setup
+  image: ubuntu:latest
+  before_script:
+    - apt-get update && apt-get install -y curl
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt-get install -y nodejs
+    - npm install -g yarn
+  script:
+    - yarn --version
+  artifacts:
+    reports:
+      dotenv: .env
+
+test:
+  stage: test
+  image: ubuntu:latest
+  before_script:
+    - apt-get update && apt-get install -y curl
+    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    - apt-get install -y nodejs
+    - npm install -g yarn
+  script:
+    - yarn --version
+    - echo "Yarn is installed and working!"
