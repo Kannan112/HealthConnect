@@ -1,29 +1,24 @@
-stages:
-  - setup
-  - test
+name: Go Build, Test, and Deploy
 
-setup:
-  stage: setup
-  image: ubuntu:latest
-  before_script:
-    - apt-get update && apt-get install -y curl
-    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    - apt-get install -y nodejs
-    - npm install -g yarn
-  script:
-    - yarn --version
-  artifacts:
-    reports:
-      dotenv: .env
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-test:
-  stage: test
-  image: ubuntu:latest
-  before_script:
-    - apt-get update && apt-get install -y curl
-    - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    - apt-get install -y nodejs
-    - npm install -g yarn
-  script:
-    - yarn --version
-    - echo "Yarn is installed and working!"
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21.5
